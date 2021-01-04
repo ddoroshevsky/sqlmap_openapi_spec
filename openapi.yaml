@@ -1,0 +1,231 @@
+openapi: '3.0.0'
+info:
+  title: SQLMap Server API
+  version: 0.0.1
+servers:
+  - url: http://{host}:{port}
+    description: URL at which SQLMap server is running
+    variables:
+      host:
+        default: 0.0.0.0
+        description: Host where SQLMap server is running
+      port:
+        default: '8775'
+        description: Port where SQLMap server is running
+paths:
+  /task/new:
+    get:
+      description: create a new task
+      operationId: createTask
+      responses:
+        '200':
+          description: create task response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTaskResponse'
+  /scan/{taskid}/start:
+    post:
+      description: start task with a given ID
+      operationId: startTask
+      parameters:
+        - name: taskid
+          in: path
+          description: ID of task to start
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUrl'
+      responses:
+        '200':
+          description: start task response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartTaskResponse'
+  /scan/{taskid}/status:
+    get:
+      description: get status of a given task
+      operationId: getTaskStatus
+      parameters:
+        - name: taskid
+          in: path
+          description: ID of task to get status for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: information about task status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatus'
+  /scan/{taskid}/log:
+    get:
+      description: get log of a given task
+      operationId: getTaskLog
+      parameters:
+        - name: taskid
+          in: path
+          description: ID of task to get log for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: task log
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskLog'
+  /option/{taskid}/list:
+    get:
+      description: list options for a given task
+      operationId: listTaskOptions
+      parameters:
+        - name: taskid
+          in: path
+          description: ID of task to list options for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: task options
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTaskOptionsResponse'
+  /option/{taskid}/set:
+    post:
+      description: set options for a given task
+      operationId: setTaskOptions
+      parameters:
+        - name: taskid
+          in: path
+          description: ID of task to set options for
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskOptions'
+      responses:
+        '200':
+          description: set task options response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetTaskOptionsResponse'
+  /scan/{taskid}/kill:
+    get:
+      description: kill a given task
+      operationId: killTask
+      parameters:
+        - name: taskid
+          in: path
+          description: ID of task to kill
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: kill task response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KillTaskResponse'
+components:
+  schemas:
+    StandardResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+          nullable: true
+    CreateTaskResponse:
+      type: object
+      required:
+        - success
+        - taskid
+      properties:
+        success:
+          type: boolean
+        taskid:
+          type: string
+    StartTaskResponse:
+      $ref: '#/components/schemas/StandardResponse'
+    TaskStatus:
+      type: object
+      required:
+        - success
+        - status
+        - returncode
+      properties:
+        success:
+          type: boolean
+        status:
+          type: string
+        returncode:
+          type: string
+          nullable: true
+    TaskLog:
+      type: object
+      required:
+        - success
+        - log
+      properties:
+        success:
+          type: boolean
+        log:
+          type: array
+          items:
+            type: object
+    GetTaskOptionsResponse:
+      type: object
+      required:
+        - success
+        - options
+      properties:
+        success:
+          type: boolean
+        options:
+          type: object
+    SetTaskOptionsResponse:
+      $ref: '#/components/schemas/StandardResponse'
+    KillTaskResponse:
+      $ref: '#/components/schemas/StandardResponse'
+    TaskOptions:
+      type: object
+      properties:
+        level:
+          type: integer
+        risk:
+          type: integer
+        technique:
+          type: string
+        verbose:
+          type: integer
+        dbms:
+          type: string
+        threads:
+          type: integer
+    TaskUrl:
+      type: object
+      properties:
+        url:
+          type: string
